@@ -5,14 +5,24 @@ from utils.my_utils import *
 
 def update_database(csv_url, conn):
     data = download_data(csv_url)
+    print('Datos descargados ...')
     data = rename_columns(data)
     save_data(data, table_name, conn)
+    print('Datos almcenados en la base de datos ...')
 
 
 def exists_table(conn, table_name):
     tables = make_query(
         f"SELECT name FROM sqlite_master WHERE type='table'", conn)
     return tables['name'].str.contains(table_name).any()
+
+
+def plot_data(conn, table_name):
+    print('Generando las graficas, por favor espere ...')
+
+    alldata = make_query(
+        f"SELECT sexo, count(sexo) FROM {table_name} GROUP BY sexo", conn)
+    print(alldata)
 
 
 def main(csv_url, database_name, table_name):
@@ -22,15 +32,13 @@ def main(csv_url, database_name, table_name):
         print('Los datos ya estan en la base de datos')
         y = input('Desea actualizar la base de datos? ([y]/[n]): ').lower()
         if y == 'y':
+            print('Descargando los datos de Covid-19, por favor espere ...')
             update_database(csv_url, conn)
     else:
-        print('Descargando los datos de Covid-19')
+        print('Descargando los datos de Covid-19, por favor espere ...')
         update_database(csv_url, conn)
 
-    alldata = make_query(f"SELECT * FROM {table_name}", conn)
-    print(alldata.shape)
-    print(alldata.head())
-    print(list(alldata.columns))
+    plot_data(conn, table_name)
     close_db(conn)
 
 
