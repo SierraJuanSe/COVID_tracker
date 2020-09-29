@@ -47,9 +47,9 @@ if __name__ == '__main__':
     direc_a = os.getcwd()
     csv_url = "https://www.datos.gov.co/api/views/gt2j-8ykr/rows.csv?accessType=DOWNLOAD"
     if '/codes' in direc_a:
-        database_name = "data/covid.db"
+        database_name = "datasets/covid.db"
     else:
-        database_name = "codes/dat/covid.db"
+        database_name = "codes/datasets/covid.db"
     table_name = "covidt"
 
     main(csv_url, database_name, table_name)
