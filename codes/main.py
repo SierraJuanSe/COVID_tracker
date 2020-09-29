@@ -49,7 +49,7 @@ if __name__ == '__main__':
     if '/codes' in direc_a:
         database_name = "data/covid.db"
     else:
-        database_name = "codes/dat/covid.db"
+        database_name = "codes/datasets/covid.db"
     table_name = "covidt"
 
     main(csv_url, database_name, table_name)
