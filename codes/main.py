@@ -1,6 +1,6 @@
 import pandas as pd
 import sqlite3 as db
-from utils.my_utils import *
+from my_utils import *
 
 
 def update_database(csv_url, conn):
@@ -21,7 +21,7 @@ def plot_data(conn, table_name):
     print('Generando las graficas, por favor espere ...')
 
     alldata = make_query(
-        f"SELECT sexo, count(sexo) FROM {table_name} GROUP BY sexo", conn)
+        f"SELECT sexo, count(sexo) FROM {table_name} WHERE sexo = 'F'  OR sexo = 'M' GROUP BY sexo", conn)
     print(alldata)
 
 
