@@ -1,4 +1,5 @@
 import os
+from os import terminal_size
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -22,19 +23,28 @@ def exists_table(conn, table_name):
     return tables['name'].str.contains(table_name).any()
 
 
-def diarios(conn, table_name):
+def diarios_comparacion(conn, table_name):
     datainf = make_query(
         f"SELECT strftime('%m-%d', f_notificacion) as mes_not, count(*) as cantidad FROM {table_name} GROUP BY mes_not ORDER BY mes_not", conn)
     datarec = make_query(
         f"SELECT strftime('%m-%d', f_recuperado) as mes_not, count(*) as cantidad FROM {table_name} WHERE mes_not IS NOT NULL GROUP BY mes_not ORDER BY mes_not", conn)
+    datamuer = make_query(
+        f"SELECT strftime('%m-%d', f_muerte) as mes_not, count(*) as cantidad FROM {table_name} WHERE mes_not IS NOT NULL GROUP BY mes_not ORDER BY mes_not", conn)
 
     xinf = datainf['mes_not']
     yinf = datainf['cantidad']
     xrec = datarec['mes_not']
     yrec = datarec['cantidad']
+    xmuer = datamuer['mes_not']
+    ymuer = datamuer['cantidad']
 
     fig, ax = plt.subplots()
     ax.plot(xinf, yinf)
+    ax.plot(xrec, yrec)
+    ax.plot(xmuer, ymuer)
+    plt.legend(['Contagiados', 'Recuperados', 'Muertos'])
+    plt.title(
+        'Comparacion contagios, recuperados y muertos en el tiempo(diarios')
     # this locator puts ticks at regular intervals
     loc = ticker.MultipleLocator(base=12)
     ax.xaxis.set_major_locator(loc)
@@ -43,7 +53,8 @@ def diarios(conn, table_name):
 
 def plot_data(conn, table_name):
     print('Generando las graficas, por favor espere ...')
-    diarios(conn, table_name)
+    diarios_comparacion(conn, table_name)
+    diarios_separados(conn, table_name)
     torta_por_genero(conn, table_name)
     muertos_por_Depto(conn, table_name)
     activos_por_Depto(conn, table_name)
