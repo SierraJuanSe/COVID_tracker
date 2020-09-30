@@ -116,7 +116,11 @@ if __name__ == '__main__':
     direc_a = os.getcwd()
     print(direc_a)
     csv_url = "https://www.datos.gov.co/api/views/gt2j-8ykr/rows.csv?accessType=DOWNLOAD"
+<<<<<<< HEAD
     if 'codes' in direc_a:
+=======
+    if '/codes' in direc_a:
+>>>>>>> 103e62e766c2b1d537067ba14d1f17f8522787d2
         database_name = "datasets/covid.db"
     else:
         database_name = "codes/datasets/covid.db"
