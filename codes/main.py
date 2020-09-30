@@ -21,11 +21,11 @@ def exists_table(conn, table_name):
 
 def plot_data(conn, table_name):
     print('Generando las graficas, por favor espere ...')
-    # torta_por_genero(conn,table_name)
-    # muertos_por_Depto(conn,table_name)
-    # activos_por_Depto(conn,table_name)
-    # recuperados_por_Depto(conn,table_name)
-    # contagiiados_por_edad(conn,table_name)
+    torta_por_genero(conn,table_name)
+    muertos_por_Depto(conn,table_name)
+    activos_por_Depto(conn,table_name)
+    recuperados_por_Depto(conn,table_name)
+    contagiiados_por_edad(conn,table_name)
     torta_por_Tipo_Contagio(conn,table_name)
 
 def torta_por_genero(conn,table_name):
@@ -116,11 +116,7 @@ if __name__ == '__main__':
     direc_a = os.getcwd()
     print(direc_a)
     csv_url = "https://www.datos.gov.co/api/views/gt2j-8ykr/rows.csv?accessType=DOWNLOAD"
-<<<<<<< HEAD
     if 'codes' in direc_a:
-=======
-    if '/codes' in direc_a:
->>>>>>> 103e62e766c2b1d537067ba14d1f17f8522787d2
         database_name = "datasets/covid.db"
     else:
         database_name = "codes/datasets/covid.db"
