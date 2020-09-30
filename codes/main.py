@@ -1,10 +1,8 @@
 import os
-from matplotlib.pyplot import subplot
-from numpy.core.shape_base import block
 import pandas as pd
-import sqlite3 as db
 import matplotlib.pyplot as plt
-import matplotlib.ticker as plticker
+import matplotlib.ticker as ticker
+import numpy as np
 
 from my_utils import *
 import matplotlib.pyplot as plt
@@ -26,29 +24,26 @@ def exists_table(conn, table_name):
 
 def diarios(conn, table_name):
     datainf = make_query(
-        f"SELECT strftime('%m-%d', f_notificacion) as mes_not, count(*) as cantidad FROM {table_name} GROUP BY mes_not", conn)
+        f"SELECT strftime('%m-%d', f_notificacion) as mes_not, count(*) as cantidad FROM {table_name} GROUP BY mes_not ORDER BY mes_not", conn)
     datarec = make_query(
-        f"SELECT strftime('%m-%d', f_recuperado) as mes_not, count(*) as cantidad FROM {table_name} GROUP BY mes_not", conn)
+        f"SELECT strftime('%m-%d', f_recuperado) as mes_not, count(*) as cantidad FROM {table_name} WHERE mes_not IS NOT NULL GROUP BY mes_not ORDER BY mes_not", conn)
 
-    datarec.set_index('mes_not')
-
-    x = datainf['mes_not']
-    inf = datainf['cantidad']
+    xinf = datainf['mes_not']
+    yinf = datainf['cantidad']
     xrec = datarec['mes_not']
-    rec = datarec['cantidad']
+    yrec = datarec['cantidad']
+
     fig, ax = plt.subplots()
-    ax.plot(x, inf)
-    ax.legend(['Infectados por dia', 'Recuperados por dia'])
-    loc = plticker.MultipleLocator(base=30.0)
+    ax.plot(xinf, yinf)
+    # this locator puts ticks at regular intervals
+    loc = ticker.MultipleLocator(base=12)
     ax.xaxis.set_major_locator(loc)
-    plt.title('numero de casos por dia')
     plt.show()
 
 
 def plot_data(conn, table_name):
     print('Generando las graficas, por favor espere ...')
     diarios(conn, table_name)
-    casos_id(conn, table_name)
     torta_por_genero(conn, table_name)
     muertos_por_Depto(conn, table_name)
     activos_por_Depto(conn, table_name)
@@ -72,34 +67,34 @@ def torta_por_genero(conn, table_name):
 
 def muertos_por_Depto(conn, table_name):
     data = make_query(
-        f"select departamento ,count(*) as total from {table_name} WHERE atencion='Fallecido' GROUP BY departamento", conn)
+        f"select departamento ,count(*) as total from {table_name} WHERE atencion='Fallecido' GROUP BY departamento ORDER BY total", conn)
     dept = data['departamento']
     cont = data['total']
     plt.figure()
     plt.title('Fallecimientos por departamento')
-    plt.barh(dept, cont)
+    plt.barh(dept[-10:], cont[-10:])
     plt.show()
 
 
 def activos_por_Depto(conn, table_name):
     data = make_query(
-        f"select departamento , count(*) as total from {table_name}  GROUP BY departamento", conn)
+        f"select departamento , count(*) as total from {table_name}  GROUP BY departamento ORDER BY total", conn)
     dept = data['departamento']
     cont = data['total']
     plt.figure()
     plt.title('Infectados por departamento')
-    plt.barh(dept, cont)
+    plt.barh(dept[-10:], cont[-10:])
     plt.show()
 
 
 def recuperados_por_Depto(conn, table_name):
     data = make_query(
-        f"select departamento ,count(*) as total from {table_name} WHERE atencion='Recuperado' GROUP BY departamento", conn)
+        f"select departamento ,count(*) as total from {table_name} WHERE atencion='Recuperado' GROUP BY departamento ORDER BY total", conn)
     dept = data['departamento']
     cont = data['total']
     plt.figure()
     plt.title('Recuperados por departamento')
-    plt.barh(dept, cont)
+    plt.barh(dept[-10:], cont[-10:])
     plt.show()
 
 
@@ -118,7 +113,6 @@ def contagiiados_por_edad(conn, table_name):
 def torta_por_Tipo_Contagio(conn, table_name):
     data = make_query(
         f"SELECT atencion,count(*) as cantidad FROM {table_name} where atencion !='Recuperado' and atencion !='Fallecido' GROUP BY atencion", conn)
-    print(data)
     y = data['cantidad']
     plt.figure()
     plt.title('Procentaje de contagiados por sexo')
