@@ -22,6 +22,20 @@ def exists_table(conn, table_name):
     return tables['name'].str.contains(table_name).any()
 
 
+
+
+
+def plot_data(conn, table_name):
+    print('Generando las graficas, por favor espere ...')
+    diarios(conn, table_name)
+    torta_por_genero(conn, table_name)
+    muertos_por_Depto(conn, table_name)
+    activos_por_Depto(conn, table_name)
+    recuperados_por_Depto(conn, table_name)
+    contagiiados_por_edad(conn, table_name)
+    torta_por_Tipo_Contagio(conn, table_name)
+
+
 def diarios(conn, table_name):
     datainf = make_query(
         f"SELECT strftime('%m-%d', f_notificacion) as mes_not, count(*) as cantidad FROM {table_name} GROUP BY mes_not ORDER BY mes_not", conn)
@@ -34,22 +48,12 @@ def diarios(conn, table_name):
     yrec = datarec['cantidad']
 
     fig, ax = plt.subplots()
+    plt.title('Curva de contagiados en el tiempo(diario)')
     ax.plot(xinf, yinf)
     # this locator puts ticks at regular intervals
     loc = ticker.MultipleLocator(base=12)
     ax.xaxis.set_major_locator(loc)
     plt.show()
-
-
-def plot_data(conn, table_name):
-    print('Generando las graficas, por favor espere ...')
-    diarios(conn, table_name)
-    torta_por_genero(conn, table_name)
-    muertos_por_Depto(conn, table_name)
-    activos_por_Depto(conn, table_name)
-    recuperados_por_Depto(conn, table_name)
-    contagiiados_por_edad(conn, table_name)
-    torta_por_Tipo_Contagio(conn, table_name)
 
 
 def torta_por_genero(conn, table_name):
@@ -71,7 +75,7 @@ def muertos_por_Depto(conn, table_name):
     dept = data['departamento']
     cont = data['total']
     plt.figure()
-    plt.title('Fallecimientos por departamento')
+    plt.title('Diez Departamentos con mas Fallecimientos')
     plt.barh(dept[-10:], cont[-10:])
     plt.show()
 
@@ -82,7 +86,7 @@ def activos_por_Depto(conn, table_name):
     dept = data['departamento']
     cont = data['total']
     plt.figure()
-    plt.title('Infectados por departamento')
+    plt.title('Diez Departamentos con mas Contagiados')
     plt.barh(dept[-10:], cont[-10:])
     plt.show()
 
@@ -93,7 +97,7 @@ def recuperados_por_Depto(conn, table_name):
     dept = data['departamento']
     cont = data['total']
     plt.figure()
-    plt.title('Recuperados por departamento')
+    plt.title('Diez Departamentos con mas recuperados')
     plt.barh(dept[-10:], cont[-10:])
     plt.show()
 
@@ -115,7 +119,7 @@ def torta_por_Tipo_Contagio(conn, table_name):
         f"SELECT atencion,count(*) as cantidad FROM {table_name} where atencion !='Recuperado' and atencion !='Fallecido' GROUP BY atencion", conn)
     y = data['cantidad']
     plt.figure()
-    plt.title('Procentaje de contagiados por sexo')
+    plt.title('Porcentaje de atención de contagiados')
     plt.pie(y,
             labels=['', 'En casa', 'Hospital', 'UCI'],
             autopct='%1.1f%%',
