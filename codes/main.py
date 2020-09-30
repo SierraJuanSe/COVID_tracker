@@ -1,6 +1,11 @@
 import os
+from matplotlib.pyplot import subplot
+from numpy.core.shape_base import block
 import pandas as pd
 import sqlite3 as db
+import matplotlib.pyplot as plt
+import matplotlib.ticker as plticker
+
 from my_utils import *
 
 
@@ -18,15 +23,35 @@ def exists_table(conn, table_name):
     return tables['name'].str.contains(table_name).any()
 
 
+def diarios(conn, table_name):
+    datainf = make_query(
+        f"SELECT strftime('%m-%d', f_notificacion) as mes_not, count(*) as cantidad FROM {table_name} GROUP BY mes_not", conn)
+    datarec = make_query(
+        f"SELECT strftime('%m-%d', f_recuperado) as mes_not, count(*) as cantidad FROM {table_name} GROUP BY mes_not", conn)
+
+    datarec.set_index('mes_not')
+
+    x = datainf['mes_not']
+    inf = datainf['cantidad']
+    xrec = datarec['mes_not']
+    rec = datarec['cantidad']
+    fig, ax = plt.subplots()
+    ax.plot(x, inf)
+    ax.legend(['Infectados por dia', 'Recuperados por dia'])
+    loc = plticker.MultipleLocator(base=30.0)
+    ax.xaxis.set_major_locator(loc)
+    plt.title('numero de casos por dia')
+    plt.show()
+
+
 def plot_data(conn, table_name):
     print('Generando las graficas, por favor espere ...')
-
-    alldata = make_query(
-        f"SELECT sexo, count(sexo) FROM {table_name} WHERE sexo = 'F'  OR sexo = 'M' GROUP BY sexo", conn)
-    print(alldata)
+    diarios(conn, table_name)
+    casos_id(conn, table_name)
 
 
 def main(csv_url, database_name, table_name):
+    plt.close('all')
     conn = connect_db(database_name)
 
     if exists_table(conn, table_name):
@@ -45,8 +70,9 @@ def main(csv_url, database_name, table_name):
 
 if __name__ == '__main__':
     direc_a = os.getcwd()
+    print(direc_a)
     csv_url = "https://www.datos.gov.co/api/views/gt2j-8ykr/rows.csv?accessType=DOWNLOAD"
-    if '/codes' in direc_a:
+    if 'codes' in direc_a:
         database_name = "datasets/covid.db"
     else:
         database_name = "codes/datasets/covid.db"
