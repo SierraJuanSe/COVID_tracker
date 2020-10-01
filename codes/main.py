@@ -54,7 +54,6 @@ def diarios_comparacion(conn, table_name):
 def plot_data(conn, table_name):
     print('Generando las graficas, por favor espere ...')
     diarios_comparacion(conn, table_name)
-    diarios_separados(conn, table_name)
     torta_por_genero(conn, table_name)
     muertos_por_Depto(conn, table_name)
     activos_por_Depto(conn, table_name)
