@@ -83,6 +83,29 @@ def sexo_edad(table_name, conn):
     fig.savefig('plots/sexo_edad.png')
     #plt.show()
 
+def localidad_sexo(table_name, conn):
+    casosf = make_query(
+        f"SELECT LOCALIDAD_ASIS, count(*) as cantidad FROM {table_name} WHERE LOCALIDAD_ASIS not null and SEXO='F' GROUP BY LOCALIDAD_ASIS ORDER BY cantidad",
+        conn
+    )
+    casosm = make_query(
+        f"SELECT LOCALIDAD_ASIS, count(*) as cantidad FROM {table_name} WHERE LOCALIDAD_ASIS not null and SEXO='M' GROUP BY LOCALIDAD_ASIS ORDER BY cantidad",
+        conn
+    )
+
+    y = np.arange(len(casosf['LOCALIDAD_ASIS']))
+    width = 0.35
+    fig, ax = plt.subplots()
+    mujeres = ax.barh(y - width/2, casosf['cantidad'], width, label='Mujeres')
+    hombres = ax.barh(y + width/2, casosm['cantidad'], width, label='Hombres')
+    ax.set_ylabel('Localidad')
+    ax.set_yticks(y)
+    ax.set_yticklabels(casosf['LOCALIDAD_ASIS'])
+    ax.legend()
+    
+    fig.tight_layout()
+    fig.savefig('plots/localidad_sexo.png')
+
 
 def localidad(table_name, conn):
     casos = make_query(
@@ -119,6 +142,7 @@ def plots(table_name, conn):
     sexo_edad(table_name, conn)
     ubicacion(table_name, conn)
     estado(table_name, conn)
+    localidad_sexo(table_name, conn)
 
 def main(csv_url, database_name, table_name):
     plt.close('all')
