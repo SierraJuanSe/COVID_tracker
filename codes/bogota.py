@@ -18,7 +18,7 @@ def estado(table_name, conn):
     ax.set_title("Estado contagiados")
     plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.5)
     plt.savefig('plots/estado')
-    #plt.show()
+    plt.show()
 
 def ubicacion(table_name, conn):
     casos = make_query(
@@ -102,9 +102,10 @@ def localidad_sexo(table_name, conn):
     ax.set_yticks(y)
     ax.set_yticklabels(casosf['LOCALIDAD_ASIS'])
     ax.legend()
-    
+    plt.title('Contagiados por localidad y sexo')
     fig.tight_layout()
     fig.savefig('plots/localidad_sexo.png')
+    plt.show()
 
 
 def localidad(table_name, conn):
