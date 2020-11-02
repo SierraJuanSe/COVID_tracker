@@ -6,31 +6,32 @@ import matplotlib.ticker as ticker
 import numpy as np
 
 from my_utils import *
-import matplotlib.pyplot as plt
 
 
-def update_database(csv_url, conn):
-    data = download_data(csv_url)
-    print('Datos descargados ...')
-    data = rename_columns(data)
-    save_data(data, table_name, conn)
-    print('Datos almcenados en la base de datos ...')
+def plot_data(conn, table_name):
+    print('Generando las graficas, por favor espere ...')
+    diarios(conn, table_name)
+    torta_por_genero(conn, table_name)
+    muertos_por_Depto(conn, table_name)
+    activos_por_Depto(conn, table_name)
+    recuperados_por_Depto(conn, table_name)
+    contagiiados_por_edad(conn, table_name)
+    torta_por_Tipo_Contagio(conn, table_name)
 
 
-def exists_table(conn, table_name):
-    tables = make_query(
-        f"SELECT name FROM sqlite_master WHERE type='table'", conn)
-    return tables['name'].str.contains(table_name).any()
-
-
-def diarios_comparacion(conn, table_name):
+def diarios(conn, table_name):
     datainf = make_query(
-        f"SELECT strftime('%m-%d', f_notificacion) as mes_not, count(*) as cantidad FROM {table_name} GROUP BY mes_not ORDER BY mes_not", conn)
+        f"SELECT f_notificacion as mes_not, count(*) as cantidad FROM {table_name} GROUP BY mes_not ORDER BY mes_not", conn)
+    datainf['mes_not'] = pd.to_datetime(datainf['mes_not'])
+    datainf['mes_not'] = datainf['mes_not'].dt.strftime("%m-%d")
     datarec = make_query(
-        f"SELECT strftime('%m-%d', f_recuperado) as mes_not, count(*) as cantidad FROM {table_name} WHERE mes_not IS NOT NULL GROUP BY mes_not ORDER BY mes_not", conn)
+        f"SELECT f_recuperado as mes_not, count(*) as cantidad FROM {table_name} WHERE mes_not IS NOT NULL GROUP BY mes_not ORDER BY mes_not", conn)
+    datarec['mes_not'] = pd.to_datetime(datarec['mes_not'])
+    datarec['mes_not'] = datarec['mes_not'].dt.strftime("%m-%d")
     datamuer = make_query(
-        f"SELECT strftime('%m-%d', f_muerte) as mes_not, count(*) as cantidad FROM {table_name} WHERE mes_not IS NOT NULL GROUP BY mes_not ORDER BY mes_not", conn)
-
+        f"SELECT f_muerte as mes_not, count(*) as cantidad FROM {table_name} WHERE mes_not IS NOT NULL GROUP BY mes_not ORDER BY mes_not", conn)
+    datamuer['mes_not'] = pd.to_datetime(datamuer['mes_not'])
+    datamuer['mes_not'] = datamuer['mes_not'].dt.strftime("%m-%d")
     xinf = datainf['mes_not']
     yinf = datainf['cantidad']
     xrec = datarec['mes_not']
@@ -50,17 +51,6 @@ def diarios_comparacion(conn, table_name):
     loc = ticker.MultipleLocator(base=12)
     ax.xaxis.set_major_locator(loc)
     plt.show()
-
-
-def plot_data(conn, table_name):
-    print('Generando las graficas, por favor espere ...')
-    diarios_comparacion(conn, table_name)
-    torta_por_genero(conn, table_name)
-    muertos_por_Depto(conn, table_name)
-    activos_por_Depto(conn, table_name)
-    recuperados_por_Depto(conn, table_name)
-    contagiiados_por_edad(conn, table_name)
-    torta_por_Tipo_Contagio(conn, table_name)
 
 
 def torta_por_genero(conn, table_name):
@@ -123,7 +113,7 @@ def contagiiados_por_edad(conn, table_name):
 
 def torta_por_Tipo_Contagio(conn, table_name):
     data = make_query(
-        f"SELECT atencion,count(*) as cantidad FROM {table_name} where atencion !='Recuperado' and atencion !='Fallecido' GROUP BY atencion", conn)
+        f"SELECT ubicacion_caso ,count(*) as cantidad FROM {table_name} where ubicacion_caso !='Recuperado' and ubicacion_caso !='Fallecido' GROUP BY ubicacion_caso", conn)
     y = data['cantidad']
     plt.figure()
     plt.title('Porcentaje de atención de contagiados')
@@ -143,10 +133,10 @@ def main(csv_url, database_name, table_name):
         y = input('Desea actualizar la base de datos? ([y]/[n]): ').lower()
         if y == 'y':
             print('Descargando los datos de Covid-19, por favor espere ...')
-            update_database(csv_url, conn)
+            update_database(csv_url, table_name, conn)
     else:
         print('Descargando los datos de Covid-19, por favor espere ...')
-        update_database(csv_url, conn)
+        update_database(csv_url, table_name, conn)
 
     plot_data(conn, table_name)
     close_db(conn)
